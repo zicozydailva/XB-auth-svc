@@ -25,3 +25,15 @@ export class CreateUserDto {
   @IsNotEmpty()
   password: string;
 }
+
+export class LoginUserDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @MinLength(5)
+  @MaxLength(30)
+  @IsNotEmpty()
+  password: string;
+}
