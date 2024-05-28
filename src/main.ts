@@ -13,22 +13,27 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
 
-  app.use(cors());
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
-  app.use(morgan('dev'));
+  // app.use(cors({}));
+  // app.use(express.json());
+  // app.use(express.urlencoded({ extended: true }));
+  // app.use(morgan('dev'));
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggerInterceptor());
 
-  const KAFKA_BROKER = app.get(ConfigService).get('KAFKA_BROKER');
+  const KAFKA_BROKER = app
+    .get(ConfigService)
+    .get('KAFKA_BROKER' || '127.0.0.1:9092');
+
+  console.log('HELLO', KAFKA_BROKER);
 
   const microservice = app.connectMicroservice({
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: [KAFKA_BROKER],
+        // brokers: [KAFKA_BROKER],
+        brokers: ['127.0.0.1:9092'],
       },
       consumer: {
         groupId: 'AUTH_MS',
@@ -36,10 +41,10 @@ async function bootstrap() {
     },
   });
 
-  // await app.listen(3000);
+  await app.listen(3000);
   // global config
   app.setGlobalPrefix('/api');
-  await app.listen(configService.get<string>('PORT'));
+  // await app.listen(configService.get<string>('PORT'));
 
   await microservice.listen();
 }
