@@ -22,9 +22,10 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggerInterceptor());
 
-  const KAFKA_BROKER = app
-    .get(ConfigService)
-    .get('KAFKA_BROKER' || '127.0.0.1:9092');
+  const KAFKA_BROKER = configService.get<string>(
+    'KAFKA_BROKER',
+    '127.0.0.1:9092',
+  );
 
   console.log('HELLO', KAFKA_BROKER);
 
@@ -32,8 +33,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        // brokers: [KAFKA_BROKER],
-        brokers: ['127.0.0.1:9092'],
+        brokers: [KAFKA_BROKER],
       },
       consumer: {
         groupId: 'AUTH_MS',
@@ -41,10 +41,10 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(3000);
+  // await app.listen(3000);
   // global config
   app.setGlobalPrefix('/api');
-  // await app.listen(configService.get<string>('PORT'));
+  await app.listen(configService.get<string>('PORT'));
 
   await microservice.listen();
 }
