@@ -7,6 +7,13 @@ import { ConfigService } from '@nestjs/config';
 import { EncryptHelper } from 'src/helpers/encrypt.helper';
 import { ClientKafka } from '@nestjs/microservices';
 import { KAFKA_CLIENT } from 'src/constants/base.constants';
+import { firstValueFrom } from 'rxjs';
+import { IUser } from 'src/interfaces/user.interface';
+import { USER_CREATED } from 'src/constants';
+
+type UserEventPayload = {
+  user: IUser;
+};
 
 @Injectable()
 export class AuthService {
@@ -20,8 +27,22 @@ export class AuthService {
     await this.kafkaClient.connect();
   }
 
+  async notifyExternalService(event: string, userPayload: UserEventPayload) {
+    const payload = {
+      id: userPayload.user.id,
+      firstName: userPayload.user.firstName,
+      lastName: userPayload.user.lastName,
+      email: userPayload.user.email,
+    };
+
+    await firstValueFrom(this.kafkaClient.emit(event, payload));
+  }
+
   async signUp(createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    const user = await this.userService.create(createUserDto);
+    await this.notifyExternalService(USER_CREATED, { user: user.data });
+
+    return user;
   }
 
   async validateUser(email: string, password: string): Promise<any> {
