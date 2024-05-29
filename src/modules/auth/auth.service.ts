@@ -27,17 +27,6 @@ export class AuthService {
     await this.kafkaClient.connect();
   }
 
-  async notifyExternalService(event: string, userPayload: UserEventPayload) {
-    const payload = {
-      id: userPayload.user.id,
-      firstName: userPayload.user.firstName,
-      lastName: userPayload.user.lastName,
-      email: userPayload.user.email,
-    };
-
-    await firstValueFrom(this.kafkaClient.emit(event, payload));
-  }
-
   async signUp(createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
     await this.notifyExternalService(USER_CREATED, { user: user.data });
@@ -80,5 +69,16 @@ export class AuthService {
       accessToken,
       expires,
     };
+  }
+
+  async notifyExternalService(event: string, userPayload: UserEventPayload) {
+    const payload = {
+      id: userPayload.user.id,
+      firstName: userPayload.user.firstName,
+      lastName: userPayload.user.lastName,
+      email: userPayload.user.email,
+    };
+
+    await firstValueFrom(this.kafkaClient.emit(event, payload));
   }
 }
