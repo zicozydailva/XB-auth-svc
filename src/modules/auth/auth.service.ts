@@ -81,4 +81,21 @@ export class AuthService {
 
     await firstValueFrom(this.kafkaClient.emit(event, payload));
   }
+
+  // async syncUsers(type: 'user_event' | 'get_sub') {
+  //   const allUsers = await this.userRepository.find();
+
+  //   const result = await Promise.allSettled(
+  //     allUsers.map(async (user) => {
+  //       if (type === 'user_event') {
+  //         return await this.notifyExternalService(USER_CREATED, { user });
+  //       }
+  //     }),
+  //   );
+
+  //   return {
+  //     success: true,
+  //     result,
+  //   };
+  // }
 }
