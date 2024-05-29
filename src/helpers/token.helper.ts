@@ -1,4 +1,4 @@
-import otpGenerator from 'otp-generator';
+import * as otpGenerator from 'otp-generator';
 import * as jwt from 'jsonwebtoken';
 import { ErrorHelper } from './error.utils';
 

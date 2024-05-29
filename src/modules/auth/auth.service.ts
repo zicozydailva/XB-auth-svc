@@ -10,6 +10,7 @@ import { KAFKA_CLIENT } from 'src/constants/base.constants';
 import { firstValueFrom } from 'rxjs';
 import { IUser } from 'src/interfaces/user.interface';
 import { USER_CREATED } from 'src/constants';
+import { classToPlain } from 'class-transformer';
 
 type UserEventPayload = {
   user: IUser;
@@ -31,7 +32,9 @@ export class AuthService {
     const user = await this.userService.create(createUserDto);
     await this.notifyExternalService(USER_CREATED, { user: user.data });
 
-    return user;
+    const tokenInfo = await this.generateAndSaveToken(user.data);
+
+    return { tokenInfo };
   }
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -52,8 +55,7 @@ export class AuthService {
 
     const secret = this.configService.get('APP_SECRET');
     const expiresIn = this.configService.get('ACCESS_TOKEN_EXPIRES');
-    // const sessionId = await this.userSessionService.create(payload);
-    const sessionId = 'await this.userSessionService.create(payload)';
+    const sessionId = 'sessionId';
 
     const payload = { email: user.email, sub: user.id };
     const { token: accessToken, expires } = TokenHelper.generate(
@@ -66,8 +68,37 @@ export class AuthService {
     );
 
     return {
+      user: classToPlain(user),
       accessToken,
       expires,
+    };
+  }
+
+  private async generateAndSaveToken(user: IUser) {
+    const payload = { ...user, password: null };
+
+    const secret = this.configService.get('APP_SECRET');
+    const expiresIn = this.configService.get('ACCESS_TOKEN_EXPIRES');
+
+    // const sessionId = await this.userSessionService.create(payload);
+
+    const { token: accessToken, expires } = TokenHelper.generate(
+      {
+        sessionId: 'sessionId',
+        ...payload,
+      },
+      secret,
+      expiresIn,
+    );
+    const refreshToken = TokenHelper.generateRandomString(50);
+
+    return {
+      token: {
+        accessToken,
+        expires,
+        refreshToken,
+      },
+      user: payload,
     };
   }
 

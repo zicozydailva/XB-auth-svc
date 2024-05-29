@@ -22,10 +22,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggerInterceptor());
 
-  const KAFKA_BROKER = configService.get<string>(
-    'KAFKA_BROKER',
-    '127.0.0.1:9092',
-  );
+  const KAFKA_BROKER = configService.get<string>('KAFKA_BROKER');
 
   const microservice = app.connectMicroservice({
     transport: Transport.KAFKA,

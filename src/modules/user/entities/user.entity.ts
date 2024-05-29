@@ -1,19 +1,27 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseTable } from 'src/base';
+import { Column, Entity } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+export class User extends BaseTable {
+  @Column({
+    type: 'varchar',
+    length: 60,
+    nullable: false,
+  })
   firstName: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 60, nullable: false })
   lastName: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 60, unique: true, nullable: true })
   email: string;
 
-  @Column()
+  @Exclude()
+  @Column({
+    type: 'varchar',
+    length: 60,
+    nullable: false,
+  })
   password: string;
 }
