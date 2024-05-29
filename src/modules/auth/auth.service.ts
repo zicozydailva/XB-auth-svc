@@ -1,17 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ErrorHelper } from 'src/helpers';
 import { UserService } from '../user/user.service';
 import { CreateUserDto, LoginUserDto } from '../user/dto/create-user.dto';
 import { TokenHelper } from 'src/helpers/token.helper';
 import { ConfigService } from '@nestjs/config';
 import { EncryptHelper } from 'src/helpers/encrypt.helper';
+import { ClientKafka } from '@nestjs/microservices';
+import { KAFKA_CLIENT } from 'src/constants/base.constants';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private configService: ConfigService,
+    @Inject(KAFKA_CLIENT) private kafkaClient: ClientKafka,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.kafkaClient.connect();
+  }
 
   async signUp(createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);

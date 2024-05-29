@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import express from 'express';
-import cors from 'cors';
-import morgan from 'morgan';
+import * as express from 'express';
+import * as cors from 'cors';
+import * as morgan from 'morgan';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
@@ -13,10 +13,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
 
-  // app.use(cors({}));
-  // app.use(express.json());
-  // app.use(express.urlencoded({ extended: true }));
-  // app.use(morgan('dev'));
+  app.use(cors({}));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(morgan('dev'));
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
@@ -26,8 +26,6 @@ async function bootstrap() {
     'KAFKA_BROKER',
     '127.0.0.1:9092',
   );
-
-  console.log('HELLO', KAFKA_BROKER);
 
   const microservice = app.connectMicroservice({
     transport: Transport.KAFKA,
